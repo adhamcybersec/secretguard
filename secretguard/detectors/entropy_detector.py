@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import List
 
-from secretguard.models import SecretFinding
+from secretguard.models import SecretFinding, Severity
 
 
 class EntropyDetector:
@@ -51,6 +51,7 @@ class EntropyDetector:
                         confidence=confidence,
                         matched_text=candidate,
                         remediation_suggestion="Verify if this is a secret. If so, move to environment variables or secret management",
+                        severity=Severity.MEDIUM,
                     )
                     findings.append(finding)
         
