@@ -72,3 +72,6 @@ temp/
 
 # Config with secrets
 .secretguard.local.yml
+
+# Claude
+.claude-initial-prompt.md

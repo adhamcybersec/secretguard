@@ -415,7 +415,5 @@ This is a fully functional, well-tested, documented open-source security tool re
 
 ---
 
-**Built autonomously by Davis**  
-Date: March 11, 2026  
-For: Adham Rashed  
-Purpose: Demonstrate autonomous software development capabilities
+**Built by Adham Rashed**
+Date: March 11, 2026

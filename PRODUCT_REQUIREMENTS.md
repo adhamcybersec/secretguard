@@ -373,7 +373,7 @@ None. v0.2.0 is fully backward compatible with v0.1.0.
 ---
 
 **Approved:** Pending  
-**Author:** Davis  
+**Author:** Adham Rashed
 **Date:** March 11, 2026  
 **Version:** 0.2.0  
 **Status:** Ready for Implementation
