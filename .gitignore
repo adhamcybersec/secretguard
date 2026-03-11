@@ -25,6 +25,8 @@ venv/
 ENV/
 env/
 .venv
+env.bak/
+venv.bak/
 
 # Testing
 .pytest_cache/
@@ -45,7 +47,27 @@ htmlcov/
 
 # Logs
 *.log
+logs/
 
 # Distribution
 dist/
 build/
+
+# Environment
+.env
+.env.local
+*.env
+
+# Reports (scan outputs)
+*.json
+*.html
+security-report.*
+scan-results.*
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Config with secrets
+.secretguard.local.yml
