@@ -152,6 +152,95 @@ class RegexDetector:
             Severity.MEDIUM,
             "Remove hardcoded authorization token",
         ),
+
+        # Slack
+        (
+            "Slack Webhook URL",
+            r"https://hooks\.slack\.com/services/T[a-zA-Z0-9_]+/B[a-zA-Z0-9_]+/[a-zA-Z0-9_]+",
+            0.95,
+            Severity.HIGH,
+            "Revoke webhook and regenerate in Slack app settings",
+        ),
+        (
+            "Slack Bot Token",
+            r"xoxb-[0-9]{10,}-[0-9]{10,}-[a-zA-Z0-9]{24}",
+            0.95,
+            Severity.HIGH,
+            "Revoke token in Slack API dashboard",
+        ),
+
+        # Azure
+        (
+            "Azure Storage Key",
+            r"DefaultEndpointProtocol=https;AccountName=[^;]+;AccountKey=[A-Za-z0-9+/=]{20,}==",
+            0.95,
+            Severity.CRITICAL,
+            "Rotate key in Azure Portal and use Azure Key Vault",
+        ),
+
+        # Email services
+        (
+            "SendGrid API Key",
+            r"SG\.[a-zA-Z0-9_-]{16,}\.[a-zA-Z0-9_-]{16,}",
+            0.95,
+            Severity.HIGH,
+            "Revoke and regenerate in SendGrid dashboard",
+        ),
+        (
+            "Twilio API Key",
+            r"SK[0-9a-fA-F]{32}",
+            0.90,
+            Severity.HIGH,
+            "Rotate key in Twilio Console",
+        ),
+        (
+            "Mailgun API Key",
+            r"key-[a-zA-Z0-9]{32}",
+            0.85,
+            Severity.HIGH,
+            "Rotate key in Mailgun dashboard",
+        ),
+
+        # Package registries
+        (
+            "npm Token",
+            r"npm_[a-zA-Z0-9]{36}",
+            0.95,
+            Severity.HIGH,
+            "Revoke token with npm token revoke",
+        ),
+        (
+            "PyPI Token",
+            r"pypi-[a-zA-Z0-9]{40,}",
+            0.95,
+            Severity.HIGH,
+            "Revoke token in PyPI account settings",
+        ),
+
+        # Git platforms
+        (
+            "GitHub Fine-Grained Token",
+            r"github_pat_[a-zA-Z0-9_]{22,}",
+            0.95,
+            Severity.HIGH,
+            "Revoke in GitHub Settings > Developer Settings > Tokens",
+        ),
+        (
+            "GitLab Personal Access Token",
+            r"glpat-[a-zA-Z0-9_\-]{20,}",
+            0.95,
+            Severity.HIGH,
+            "Revoke in GitLab User Settings > Access Tokens",
+        ),
+
+        # Chat platforms
+        (
+            "Discord Bot Token",
+            r"[MN][a-zA-Z0-9]{23,}\.[a-zA-Z0-9_-]{6}\.[a-zA-Z0-9_-]{27,}",
+            0.85,
+            Severity.HIGH,
+            "Regenerate token in Discord Developer Portal",
+        ),
     ]
     
     def detect(self, line: str, line_num: int, file_path: Path) -> List[SecretFinding]:
