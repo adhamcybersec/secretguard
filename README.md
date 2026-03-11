@@ -26,7 +26,7 @@ pip install secretguard
 Or install from source:
 
 ```bash
-git clone https://github.com/adhamrashed/secretguard.git
+git clone https://github.com/adhamcybersec/secretguard.git
 cd secretguard
 pip install -e .
 ```
@@ -193,7 +193,7 @@ api_key = "demo_key"  // secretguard:ignore
 ### Setup
 
 ```bash
-git clone https://github.com/adhamrashed/secretguard.git
+git clone https://github.com/adhamcybersec/secretguard.git
 cd secretguard
 pip install -e ".[dev]"
 ```
