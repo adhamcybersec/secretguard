@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import List, Optional
 import re
 
+import pathspec
+
 from secretguard.models import SecretFinding, ScanResults
 from secretguard.detectors.regex_detector import RegexDetector
 from secretguard.detectors.entropy_detector import EntropyDetector
@@ -57,11 +59,35 @@ class ScanEngine:
         
         return results
     
+    def _load_gitignore(self, directory: Path):
+        """Load .gitignore patterns using pathspec"""
+        gitignore = directory / ".gitignore"
+        if gitignore.exists():
+            patterns = gitignore.read_text().splitlines()
+            return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+        return None
+
     def _scan_directory(self, directory: Path, results: ScanResults) -> None:
-        """Recursively scan a directory"""
+        """Recursively scan a directory, respecting .gitignore"""
+        spec = self._load_gitignore(directory)
+
         for file_path in directory.rglob("*"):
-            if file_path.is_file() and not self._should_exclude(file_path):
-                self._scan_file(file_path, results)
+            if not file_path.is_file():
+                continue
+
+            # Check pathspec (gitignore)
+            try:
+                rel = file_path.relative_to(directory)
+                if spec and spec.match_file(str(rel)):
+                    continue
+            except ValueError:
+                pass
+
+            # Check manual excludes
+            if self._should_exclude(file_path):
+                continue
+
+            self._scan_file(file_path, results)
     
     def _scan_file(self, file_path: Path, results: ScanResults) -> None:
         """Scan a single file for secrets"""
