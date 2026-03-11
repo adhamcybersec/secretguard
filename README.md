@@ -2,6 +2,12 @@
 
 > AI-enhanced secret detection and remediation tool for codebases
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![GitHub Issues](https://img.shields.io/github/issues/adhamcybersec/secretguard)](https://github.com/adhamcybersec/secretguard/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/adhamcybersec/secretguard)](https://github.com/adhamcybersec/secretguard/stargazers)
+[![Release](https://img.shields.io/github/v/release/adhamcybersec/secretguard)](https://github.com/adhamcybersec/secretguard/releases)
+
 SecretGuard scans your source code repositories for exposed credentials, API keys, passwords, and sensitive data using intelligent pattern recognition that goes beyond traditional regex-based scanners.
 
 ## Features
