@@ -10,8 +10,12 @@ SecretGuard scans your source code repositories for exposed credentials, API key
 - 🧠 **Smart Entropy Analysis**: Identifies high-randomness strings likely to be secrets
 - 🛠️ **Remediation Advisor**: Get actionable fix suggestions
 - ⚡ **Fast Scanning**: Efficient file traversal with gitignore support
-- 📊 **Multiple Output Formats**: JSON, HTML, and Markdown reports
+- 📊 **Multiple Output Formats**: JSON, HTML, Markdown, and Console reports
 - 🔗 **CI/CD Ready**: Easy integration with GitHub Actions, GitLab CI, etc.
+- ⚙️ **Configurable**: Project-specific settings via .secretguard.yml
+- 🚫 **Allowlist Support**: Ignore known false positives
+- 🎨 **Custom Patterns**: Define your own secret patterns
+- 🪝 **Pre-commit Hooks**: Prevent secrets from being committed
 
 ## Installation
 
@@ -29,22 +33,40 @@ pip install -e .
 
 ## Quick Start
 
-Scan a directory:
+### Initialize Configuration
 
 ```bash
+# Create .secretguard.yml in current directory
+secretguard init
+```
+
+### Scan a Directory
+
+```bash
+# Basic scan
 secretguard scan /path/to/project
-```
 
-Scan with specific output format:
-
-```bash
+# Scan with specific output format
 secretguard scan /path/to/project --format json --output report.json
+
+# Generate beautiful HTML report
+secretguard scan /path/to/project --format html --output report.html
+
+# Scan with remediation suggestions
+secretguard scan /path/to/project --remediate
 ```
 
-Scan with remediation suggestions:
+### Install Pre-commit Hook
 
 ```bash
-secretguard scan /path/to/project --remediate
+# Prevent secrets from being committed
+secretguard install-hook
+
+# Check hook status
+secretguard hook-status
+
+# Uninstall hook
+secretguard uninstall-hook
 ```
 
 ## Usage
@@ -119,7 +141,7 @@ SecretGuard uses a multi-layered detection approach:
 
 ## Configuration
 
-Create a `.secretguard.yml` in your project root:
+Create a `.secretguard.yml` in your project root using `secretguard init`, or create manually:
 
 ```yaml
 # Paths to exclude from scanning
@@ -127,20 +149,43 @@ exclude:
   - "node_modules/**"
   - "*.test.js"
   - "vendor/**"
+  - ".git/**"
 
 # Minimum confidence threshold (0.0-1.0)
 confidence_threshold: 0.75
 
-# Custom patterns (regex)
+# Custom patterns (regex) - define your own secret patterns
 custom_patterns:
   - name: "Custom API Key"
     pattern: "CUSTOM_[A-Z0-9]{32}"
+    confidence: 0.95
     severity: high
+    remediation: "Move to environment variables"
 
-# False positive patterns to ignore
+# Allowlist - ignore specific findings (reduce false positives)
+allowlist:
+  - file: "tests/fixtures/secrets.py"
+    line: 10
+    reason: "Test fixture, not a real secret"
+  - pattern: "example.*key"
+    reason: "Documentation examples"
+
+# False positive patterns to ignore globally
 ignore_patterns:
   - "example_api_key_here"
   - "REPLACE_WITH_YOUR_KEY"
+  - "your_api_key_here"
+```
+
+### Inline Ignoring
+
+You can also ignore specific lines in your code using comments:
+
+```python
+password = "test123"  # secretguard:ignore
+
+# Or use alternative syntax
+api_key = "demo_key"  // secretguard:ignore
 ```
 
 ## Development

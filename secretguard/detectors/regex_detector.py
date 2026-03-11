@@ -12,7 +12,16 @@ from secretguard.models import SecretFinding
 class RegexDetector:
     """Detects secrets using regex patterns"""
     
-    # Pattern definitions: (name, pattern, confidence)
+    def __init__(self, custom_patterns=None):
+        """
+        Initialize detector
+        
+        Args:
+            custom_patterns: List of CustomPattern objects from config
+        """
+        self.custom_patterns = custom_patterns or []
+    
+    # Pattern definitions: (name, pattern, confidence, remediation)
     PATTERNS = [
         # AWS
         (
@@ -143,6 +152,7 @@ class RegexDetector:
         """
         findings = []
         
+        # Check built-in patterns
         for pattern_name, pattern, confidence, remediation in self.PATTERNS:
             matches = re.finditer(pattern, line, re.IGNORECASE)
             
@@ -161,6 +171,29 @@ class RegexDetector:
                     remediation_suggestion=remediation,
                 )
                 findings.append(finding)
+        
+        # Check custom patterns
+        for custom_pattern in self.custom_patterns:
+            try:
+                matches = re.finditer(custom_pattern.pattern, line, re.IGNORECASE)
+                
+                for match in matches:
+                    if self._is_false_positive(match.group(0)):
+                        continue
+                    
+                    finding = SecretFinding(
+                        file_path=file_path,
+                        line_number=line_num,
+                        line_content=line.strip(),
+                        secret_type=f"{custom_pattern.name} (custom)",
+                        confidence=custom_pattern.confidence,
+                        matched_text=match.group(0),
+                        remediation_suggestion=custom_pattern.remediation,
+                    )
+                    findings.append(finding)
+            except re.error:
+                # Invalid regex in custom pattern, skip it
+                pass
         
         return findings
     

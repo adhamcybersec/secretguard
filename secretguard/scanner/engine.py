@@ -19,13 +19,14 @@ class ScanEngine:
         exclude_patterns: Optional[List[str]] = None,
         confidence_threshold: float = 0.75,
         verbose: bool = False,
+        custom_patterns: Optional[List] = None,
     ):
         self.exclude_patterns = exclude_patterns or []
         self.confidence_threshold = confidence_threshold
         self.verbose = verbose
         
         # Initialize detectors
-        self.regex_detector = RegexDetector()
+        self.regex_detector = RegexDetector(custom_patterns=custom_patterns)
         self.entropy_detector = EntropyDetector()
     
     def scan(self, path: Path) -> ScanResults:
