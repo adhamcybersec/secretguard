@@ -38,6 +38,7 @@ def scan(
     config: Optional[Path] = typer.Option(None, help="Path to config file (.secretguard.yml)"),
     no_config: bool = typer.Option(False, help="Ignore config file"),
     staged: bool = typer.Option(False, "--staged", help="Only scan git-staged files"),
+    no_ml: bool = typer.Option(False, "--no-ml", help="Disable ML-based detection (faster scans)"),
 ) -> None:
     """
     Scan a directory for exposed secrets and credentials
@@ -72,6 +73,7 @@ def scan(
         confidence_threshold=confidence_threshold,
         verbose=verbose,
         custom_patterns=cfg.custom_patterns if cfg else [],
+        use_ml=not no_ml,
     )
     
     # Run scan
