@@ -11,6 +11,7 @@ import pathspec
 from secretguard.models import SecretFinding, ScanResults
 from secretguard.detectors.regex_detector import RegexDetector
 from secretguard.detectors.entropy_detector import EntropyDetector
+from secretguard.detectors.ml_detector import MLDetector
 from secretguard.config.allowlist import AllowlistManager
 
 
@@ -31,6 +32,7 @@ class ScanEngine:
         # Initialize detectors
         self.regex_detector = RegexDetector(custom_patterns=custom_patterns)
         self.entropy_detector = EntropyDetector()
+        self.ml_detector = MLDetector()
     
     def scan(self, path: Path) -> ScanResults:
         """
@@ -120,6 +122,17 @@ class ScanEngine:
                 for finding in entropy_findings:
                     if finding.confidence >= self.confidence_threshold:
                         results.findings.append(finding)
+
+                # Run ML detection
+                ml_findings = self.ml_detector.detect(line, line_num, file_path)
+                for finding in ml_findings:
+                    if finding.confidence >= self.confidence_threshold:
+                        # Avoid duplicates with regex/entropy findings
+                        if not any(
+                            f.line_number == finding.line_number and f.matched_text == finding.matched_text
+                            for f in results.findings
+                        ):
+                            results.findings.append(finding)
         
         except Exception as e:
             if self.verbose:
