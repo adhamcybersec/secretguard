@@ -9,6 +9,7 @@ import re
 from secretguard.models import SecretFinding, ScanResults
 from secretguard.detectors.regex_detector import RegexDetector
 from secretguard.detectors.entropy_detector import EntropyDetector
+from secretguard.config.allowlist import AllowlistManager
 
 
 class ScanEngine:
@@ -78,6 +79,10 @@ class ScanEngine:
             lines = content.splitlines()
             
             for line_num, line in enumerate(lines, start=1):
+                # Check inline ignore
+                if AllowlistManager.check_inline_ignore(line):
+                    continue
+
                 # Run regex detection
                 regex_findings = self.regex_detector.detect(line, line_num, file_path)
                 for finding in regex_findings:
