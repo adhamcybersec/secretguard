@@ -16,7 +16,7 @@ def detector():
 
 def test_aws_access_key_detection(detector):
     """Test detection of AWS access keys"""
-    line = 'AWS_ACCESS_KEY_ID="AKIAIOSFODNN7EXAMPLE"'
+    line = 'AWS_ACCESS_KEY_ID="AKIAIOSFODNN7REALKEY"'
     findings = detector.detect(line, 10, Path("test.py"))
     
     assert len(findings) == 1
@@ -26,7 +26,7 @@ def test_aws_access_key_detection(detector):
 
 def test_github_token_detection(detector):
     """Test detection of GitHub tokens"""
-    line = "token = 'ghp_1234567890abcdefghijklmnopqrstuvwxyz'"
+    line = "token = 'ghp_abcdefghijklmnopqrstuvwxyzABCDEF1234'"
     findings = detector.detect(line, 5, Path("config.py"))
     
     assert len(findings) == 1
@@ -44,7 +44,7 @@ def test_false_positive_filtering(detector):
 
 def test_multiple_secrets_in_line(detector):
     """Test detection of multiple secrets in one line"""
-    line = 'aws="AKIAIOSFODNN7EXAMPLE" github="ghp_1234567890abcdefghijklmnopqrstuvwxyz"'
+    line = 'aws="AKIAIOSFODNN7REALKEY" github="ghp_abcdefghijklmnopqrstuvwxyzABCDEF1234"'
     findings = detector.detect(line, 20, Path("secrets.py"))
     
     assert len(findings) == 2
