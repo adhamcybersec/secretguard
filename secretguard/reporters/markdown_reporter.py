@@ -35,14 +35,14 @@ class MarkdownReporter:
             lines.extend([
                 "## Findings",
                 "",
-                "| File | Line | Type | Confidence |",
-                "|------|------|------|------------|",
+                "| File | Line | Type | Severity | Confidence |",
+                "|------|------|------|----------|------------|",
             ])
-            
+
             for finding in results.findings:
                 file_short = str(finding.file_path)[-50:]  # Truncate long paths
                 lines.append(
-                    f"| {file_short} | {finding.line_number} | {finding.secret_type} | {finding.confidence:.0%} |"
+                    f"| {file_short} | {finding.line_number} | {finding.secret_type} | {finding.severity.value.upper()} | {finding.confidence:.0%} |"
                 )
             
             if include_remediation:

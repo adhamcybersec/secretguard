@@ -37,6 +37,7 @@ class JSONReporter:
                 "file": str(finding.file_path),
                 "line": finding.line_number,
                 "type": finding.secret_type,
+                "severity": finding.severity.value,
                 "confidence": round(finding.confidence, 2),
                 "matched_text": finding.matched_text[:50] + "..." if len(finding.matched_text) > 50 else finding.matched_text,
                 "line_content": finding.line_content,

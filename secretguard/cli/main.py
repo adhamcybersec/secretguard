@@ -153,13 +153,15 @@ def display_console_results(results, include_remediation: bool = False) -> None:
     table.add_column("File", style="cyan")
     table.add_column("Line", justify="right", style="yellow")
     table.add_column("Type", style="red")
+    table.add_column("Severity", style="bold red")
     table.add_column("Confidence", justify="right", style="green")
-    
+
     for finding in results.findings:
         table.add_row(
             str(finding.file_path),
             str(finding.line_number),
             finding.secret_type,
+            finding.severity.value.upper(),
             f"{finding.confidence:.2%}",
         )
     

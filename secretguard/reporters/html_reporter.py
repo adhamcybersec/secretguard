@@ -226,10 +226,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <h2>🚨 Security Findings</h2>
             
             {% for finding in findings %}
-            <div class="finding-card {{ 'high' if finding.confidence >= 0.9 else ('medium' if finding.confidence >= 0.75 else 'low') }}">
+            <div class="finding-card {{ 'high' if finding.severity in ['critical', 'high'] else ('medium' if finding.severity == 'medium' else 'low') }}">
                 <div class="finding-header">
                     <div class="finding-title">{{ finding.secret_type }}</div>
-                    <div class="confidence-badge">{{ (finding.confidence * 100)|int }}% Confidence</div>
+                    <div class="confidence-badge">{{ finding.severity|upper }} | {{ (finding.confidence * 100)|int }}% Confidence</div>
                 </div>
                 
                 <div class="finding-meta">
@@ -293,6 +293,7 @@ class HTMLReporter:
                 'line_content': finding.line_content,
                 'secret_type': finding.secret_type,
                 'confidence': finding.confidence,
+                'severity': finding.severity.value,
                 'remediation_suggestion': finding.remediation_suggestion,
             })
         
