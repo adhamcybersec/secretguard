@@ -13,6 +13,7 @@ from secretguard.scanner.engine import ScanEngine
 from secretguard.reporters.json_reporter import JSONReporter
 from secretguard.reporters.markdown_reporter import MarkdownReporter
 from secretguard.reporters.html_reporter import HTMLReporter
+from secretguard.reporters.sarif_reporter import SARIFReporter
 from secretguard.config.loader import ConfigLoader
 from secretguard.config.allowlist import AllowlistManager
 from secretguard.hooks.installer import PreCommitInstaller
@@ -28,7 +29,7 @@ console = Console()
 @app.command()
 def scan(
     path: Path = typer.Argument(..., help="Path to scan for secrets"),
-    format: str = typer.Option("console", help="Output format: console, json, markdown, html"),
+    format: str = typer.Option("console", help="Output format: console, json, markdown, html, sarif"),
     output: Optional[Path] = typer.Option(None, help="Output file path"),
     exclude: Optional[List[str]] = typer.Option(None, help="Patterns to exclude"),
     confidence: Optional[float] = typer.Option(None, help="Minimum confidence threshold (0.0-1.0)"),
@@ -126,6 +127,14 @@ def scan(
             temp_output = Path("secretguard-report.html")
             reporter.save(report_data, temp_output)
             console.print(f"[green]✅ HTML report: {temp_output.absolute()}[/green]")
+    elif format == "sarif":
+        reporter = SARIFReporter()
+        report_data = reporter.generate(results)
+        if output:
+            reporter.save(report_data, output)
+            console.print(f"[green]SARIF report saved to {output}[/green]")
+        else:
+            print(report_data)
     else:
         console.print(f"[red]Error: Unknown format '{format}'[/red]")
         raise typer.Exit(code=1)
