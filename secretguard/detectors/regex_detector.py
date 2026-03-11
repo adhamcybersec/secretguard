@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import List
 
-from secretguard.scanner.engine import SecretFinding
+from secretguard.models import SecretFinding
 
 
 class RegexDetector:

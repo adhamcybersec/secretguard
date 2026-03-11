@@ -3,7 +3,7 @@ Markdown report generation
 """
 
 from pathlib import Path
-from secretguard.scanner.engine import ScanResults
+from secretguard.models import ScanResults
 
 
 class MarkdownReporter:

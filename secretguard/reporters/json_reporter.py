@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-from secretguard.scanner.engine import ScanResults
+from secretguard.models import ScanResults
 
 
 class JSONReporter:
