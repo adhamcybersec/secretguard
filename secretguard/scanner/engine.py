@@ -99,6 +99,34 @@ class ScanEngine:
             if self.verbose:
                 print(f"Error scanning {file_path}: {e}")
     
+    def scan_files(self, files: List[Path]) -> ScanResults:
+        """Scan a specific list of files"""
+        import time
+        start_time = time.time()
+        results = ScanResults()
+
+        for file_path in files:
+            if file_path.is_file() and not self._should_exclude(file_path):
+                self._scan_file(file_path, results)
+
+        results.scan_duration = time.time() - start_time
+        results.total_secrets = len(results.findings)
+        return results
+
+    def get_staged_files(self, repo_path: Path) -> List[Path]:
+        """Get list of staged files from git"""
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
+                capture_output=True, text=True, cwd=repo_path
+            )
+            if result.returncode != 0:
+                return []
+            return [repo_path / f for f in result.stdout.strip().splitlines() if f]
+        except Exception:
+            return []
+
     def _should_exclude(self, file_path: Path) -> bool:
         """Check if a file should be excluded based on patterns"""
         path_str = str(file_path)

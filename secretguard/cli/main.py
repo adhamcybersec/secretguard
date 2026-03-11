@@ -36,6 +36,7 @@ def scan(
     remediate: bool = typer.Option(False, help="Include remediation suggestions"),
     config: Optional[Path] = typer.Option(None, help="Path to config file (.secretguard.yml)"),
     no_config: bool = typer.Option(False, help="Ignore config file"),
+    staged: bool = typer.Option(False, "--staged", help="Only scan git-staged files"),
 ) -> None:
     """
     Scan a directory for exposed secrets and credentials
@@ -73,7 +74,15 @@ def scan(
     )
     
     # Run scan
-    results = engine.scan(path)
+    if staged:
+        staged_files = engine.get_staged_files(path)
+        if not staged_files:
+            console.print("[yellow]No staged files to scan[/yellow]")
+            raise typer.Exit(code=0)
+        console.print(f"[cyan]Scanning {len(staged_files)} staged files...[/cyan]")
+        results = engine.scan_files(staged_files)
+    else:
+        results = engine.scan(path)
     
     # Apply allowlist filtering
     if cfg and (cfg.allowlist or cfg.ignore_patterns):
