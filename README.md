@@ -2,26 +2,27 @@
 
 > AI-enhanced secret detection and remediation tool for codebases
 
+[![PyPI version](https://img.shields.io/pypi/v/secretguard)](https://pypi.org/project/secretguard/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![GitHub Issues](https://img.shields.io/github/issues/adhamcybersec/secretguard)](https://github.com/adhamcybersec/secretguard/issues)
 [![GitHub Stars](https://img.shields.io/github/stars/adhamcybersec/secretguard)](https://github.com/adhamcybersec/secretguard/stargazers)
-[![Release](https://img.shields.io/github/v/release/adhamcybersec/secretguard)](https://github.com/adhamcybersec/secretguard/releases)
 
-SecretGuard scans your source code repositories for exposed credentials, API keys, passwords, and sensitive data using intelligent pattern recognition that goes beyond traditional regex-based scanners.
+SecretGuard scans your source code for exposed credentials, API keys, passwords, and sensitive data using a triple-layer detection engine: regex patterns, Shannon entropy analysis, and a Random Forest ML classifier (F1: 0.96).
 
 ## Features
 
-- 🔍 **Multi-Pattern Detection**: Regex + AI-powered anomaly detection
-- 🧠 **Smart Entropy Analysis**: Identifies high-randomness strings likely to be secrets
-- 🛠️ **Remediation Advisor**: Get actionable fix suggestions
-- ⚡ **Fast Scanning**: Efficient file traversal with gitignore support
-- 📊 **Multiple Output Formats**: JSON, HTML, Markdown, and Console reports
-- 🔗 **CI/CD Ready**: Easy integration with GitHub Actions, GitLab CI, etc.
-- ⚙️ **Configurable**: Project-specific settings via .secretguard.yml
-- 🚫 **Allowlist Support**: Ignore known false positives
-- 🎨 **Custom Patterns**: Define your own secret patterns
-- 🪝 **Pre-commit Hooks**: Prevent secrets from being committed
+- **Triple-Layer Detection**: 28+ regex patterns, entropy analysis, and ML classifier working together
+- **ML-Powered**: Random Forest model trained on 210 samples with cross-validation (Precision: 0.95, Recall: 0.97)
+- **Secret Masking**: All report outputs mask detected secrets to prevent secondary leakage
+- **Git History Scanning**: Scan past commits for secrets with `scan-history`
+- **Live Verification**: `--verify` flag checks if detected credentials are still active (GitHub, AWS)
+- **SARIF Output**: IDE and CI/CD integration with enriched SARIF 2.1.0 reports
+- **Pre-commit Framework**: Native `.pre-commit-hooks.yaml` for standard pre-commit integration
+- **Secure by Default**: Report files written with 0o600 permissions, symlinks skipped
+- **Multiple Formats**: Console, JSON, Markdown, HTML, and SARIF output
+- **Configurable**: Project-specific settings via `.secretguard.yml`
+- **Allowlist & Inline Ignore**: Reduce false positives with file/pattern allowlists and `# secretguard:ignore`
 
 ## Installation
 
@@ -29,79 +30,67 @@ SecretGuard scans your source code repositories for exposed credentials, API key
 pip install secretguard
 ```
 
-Or install from source:
+With live credential verification support:
 
 ```bash
-git clone https://github.com/adhamcybersec/secretguard.git
-cd secretguard
-pip install -e .
+pip install secretguard[verify]
 ```
 
 ## Quick Start
 
-### Initialize Configuration
-
 ```bash
-# Create .secretguard.yml in current directory
-secretguard init
-```
+# Scan current directory
+secretguard scan
 
-### Scan a Directory
-
-```bash
-# Basic scan
-secretguard scan /path/to/project
-
-# Scan with specific output format
+# Scan a specific path with JSON output
 secretguard scan /path/to/project --format json --output report.json
 
-# Generate beautiful HTML report
-secretguard scan /path/to/project --format html --output report.html
+# Generate HTML report
+secretguard scan . --format html --output report.html
 
 # Scan with remediation suggestions
-secretguard scan /path/to/project --remediate
+secretguard scan . --remediate
+
+# Disable ML for faster scans
+secretguard scan . --no-ml
+
+# Verify detected credentials are active
+secretguard scan . --verify
+
+# Scan git history for leaked secrets
+secretguard scan-history --max-commits 200
+
+# Evaluate ML model performance
+secretguard ml-evaluate
 ```
 
-### Install Pre-commit Hook
+## Pre-commit Framework Integration
+
+Add to your `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/adhamcybersec/secretguard
+    rev: v0.8.0
+    hooks:
+      - id: secretguard
+```
+
+Then run:
 
 ```bash
-# Prevent secrets from being committed
+pre-commit install
+```
+
+Alternatively, use the built-in hook installer:
+
+```bash
 secretguard install-hook
-
-# Check hook status
-secretguard hook-status
-
-# Uninstall hook
-secretguard uninstall-hook
 ```
 
-## Usage
+## CI/CD Integration
 
-### Basic Scan
-
-```bash
-secretguard scan .
-```
-
-### Advanced Options
-
-```bash
-# Exclude specific paths
-secretguard scan . --exclude "*.test.js" --exclude "node_modules/*"
-
-# Set minimum confidence threshold (0.0-1.0)
-secretguard scan . --confidence 0.8
-
-# Scan with verbose output
-secretguard scan . --verbose
-
-# Generate HTML report
-secretguard scan . --format html --output security-report.html
-```
-
-### CI/CD Integration
-
-#### GitHub Actions
+### GitHub Actions
 
 ```yaml
 name: Secret Scan
@@ -111,116 +100,151 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - run: pip install secretguard
-      - run: secretguard scan . --format json --output scan-results.json
-      - uses: actions/upload-artifact@v3
+      - run: secretguard scan . --format sarif --output results.sarif
+      - uses: github/codeql-action/upload-sarif@v3
         with:
-          name: scan-results
-          path: scan-results.json
+          sarif_file: results.sarif
+```
+
+### GitLab CI
+
+```yaml
+include:
+  - remote: 'https://raw.githubusercontent.com/adhamcybersec/secretguard/master/ci-templates/gitlab-ci.yml'
+```
+
+Or add manually:
+
+```yaml
+secretguard-scan:
+  stage: test
+  image: python:3.12-slim
+  before_script:
+    - pip install secretguard
+  script:
+    - secretguard scan . --format sarif --output gl-secretguard-report.sarif
+  artifacts:
+    reports:
+      sast: gl-secretguard-report.sarif
 ```
 
 ## How It Works
 
-SecretGuard uses a multi-layered detection approach:
+SecretGuard uses a triple-layer detection approach:
 
-1. **Regex Pattern Matching**: Detects known secret patterns (AWS keys, GitHub tokens, etc.)
-2. **Entropy Analysis**: Identifies high-randomness strings that could be passwords/keys
-3. **AI Pattern Recognition**: ML model trained to identify unknown secret patterns
-4. **Context Analysis**: Examines surrounding code for secret-like usage patterns
+1. **Regex Pattern Matching** (28+ patterns): Detects known secret formats — AWS keys, GitHub tokens, Stripe keys, private key headers, database connection strings, and more. Patterns are grouped by provider in `secretguard/detectors/patterns.py`.
+
+2. **Shannon Entropy Analysis**: Identifies high-randomness strings (entropy >= 4.0) that could be passwords or keys. Applies confidence scoring based on entropy, length, and character diversity, with penalties for UUIDs and git hashes.
+
+3. **ML Classification** (Random Forest): A classifier trained on 210 labeled samples catches secrets that don't match known patterns. Features include entropy, character ratios, diversity, common prefixes, and consecutive character runs. Cross-validated at F1: 0.96.
+
+Results are deduplicated across detectors using O(1) set-based lookup, and the ML model is cached to disk for fast subsequent scans.
 
 ## Supported Secret Types
 
-- AWS Access Keys & Secret Keys
-- GitHub Personal Access Tokens
-- Google Cloud API Keys
-- Stripe API Keys
-- Private Keys (RSA, SSH, PGP)
-- Database Connection Strings
-- OAuth Tokens
-- JWT Tokens
-- Generic API Keys
-- Passwords (in various formats)
+| Category | Types |
+|----------|-------|
+| **Cloud** | AWS Access Keys, AWS Secret Keys, Google API Keys, Azure Storage Keys |
+| **Git Platforms** | GitHub PATs, GitHub OAuth, GitHub Fine-Grained, GitLab PATs |
+| **Payment** | Stripe Live & Test Keys |
+| **Communication** | Slack Webhooks, Slack Bot Tokens, Discord Bot Tokens |
+| **Email** | SendGrid, Twilio, Mailgun API Keys |
+| **Packages** | npm Tokens, PyPI Tokens |
+| **Crypto** | RSA/SSH/PGP/EC/DSA Private Keys |
+| **Databases** | PostgreSQL, MySQL, MongoDB, Redis connection strings |
+| **Auth** | JWT Tokens, OAuth Bearer Tokens, Generic API Keys, Passwords |
 
 ## Configuration
 
-Create a `.secretguard.yml` in your project root using `secretguard init`, or create manually:
+Create `.secretguard.yml` with `secretguard init`, or manually:
 
 ```yaml
-# Paths to exclude from scanning
 exclude:
   - "node_modules/**"
   - "*.test.js"
   - "vendor/**"
-  - ".git/**"
 
-# Minimum confidence threshold (0.0-1.0)
 confidence_threshold: 0.75
 
-# Custom patterns (regex) - define your own secret patterns
 custom_patterns:
-  - name: "Custom API Key"
-    pattern: "CUSTOM_[A-Z0-9]{32}"
+  - name: "Internal API Key"
+    pattern: "INTERNAL_[A-Z0-9]{32}"
     confidence: 0.95
     severity: high
     remediation: "Move to environment variables"
 
-# Allowlist - ignore specific findings (reduce false positives)
 allowlist:
   - file: "tests/fixtures/secrets.py"
     line: 10
-    reason: "Test fixture, not a real secret"
+    reason: "Test fixture"
   - pattern: "example.*key"
     reason: "Documentation examples"
 
-# False positive patterns to ignore globally
 ignore_patterns:
   - "example_api_key_here"
   - "REPLACE_WITH_YOUR_KEY"
-  - "your_api_key_here"
 ```
 
 ### Inline Ignoring
 
-You can also ignore specific lines in your code using comments:
+Ignore specific lines using comment markers:
 
 ```python
 password = "test123"  # secretguard:ignore
-
-# Or use alternative syntax
-api_key = "demo_key"  // secretguard:ignore
+api_key = "demo_key"  # sg:ignore
 ```
 
-## Development
+The marker must appear after a comment delimiter (`#`, `//`, `/*`, `--`) to prevent abuse via string values.
 
-### Setup
+## CLI Reference
+
+| Command | Description |
+|---------|-------------|
+| `secretguard scan [PATH]` | Scan files for secrets (default: `.`) |
+| `secretguard scan-history` | Scan git commit history |
+| `secretguard ml-evaluate` | Show ML model cross-validation metrics |
+| `secretguard init` | Create `.secretguard.yml` template |
+| `secretguard install-hook` | Install git pre-commit hook |
+| `secretguard uninstall-hook` | Remove pre-commit hook |
+| `secretguard hook-status` | Check hook installation |
+| `secretguard version` | Show version |
+
+### Scan Options
+
+| Flag | Description |
+|------|-------------|
+| `--format` | Output format: `console`, `json`, `markdown`, `html`, `sarif` |
+| `--output PATH` | Save report to file |
+| `--confidence FLOAT` | Minimum confidence threshold (0.0-1.0) |
+| `--exclude PATTERN` | Exclude file patterns |
+| `--no-ml` | Disable ML detection (faster) |
+| `--verify` | Attempt live credential verification |
+| `--staged` | Only scan git-staged files |
+| `--remediate` | Include fix suggestions |
+| `--verbose` | Verbose output |
+| `--config PATH` | Custom config file path |
+| `--no-config` | Ignore config file |
+
+## Security Features
+
+- **Secret masking**: Reports never contain raw secret values (first/last 4 chars visible)
+- **Secure permissions**: Report files are created with `0o600` (owner-only read/write)
+- **Symlink protection**: Scanner skips symlinks and validates resolved paths stay within scan directory
+- **Hardened ignores**: `secretguard:ignore` markers only work inside comments, not string values
+- **Opt-in verification**: Live credential checks require explicit `--verify` flag
+
+## Development
 
 ```bash
 git clone https://github.com/adhamcybersec/secretguard.git
 cd secretguard
 pip install -e ".[dev]"
-```
-
-### Run Tests
-
-```bash
 pytest
-```
-
-### Code Quality
-
-```bash
-# Format code
-black .
-
-# Lint
-ruff check .
-
-# Type check
-mypy secretguard
 ```
 
 ## Contributing
@@ -239,15 +263,10 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Author
 
-**Adham Rashed**  
-Database Security Researcher  
-[adhampx.com](https://adhampx.com) | [LinkedIn](https://linkedin.com/in/adhamrashed)
-
-## Acknowledgments
-
-- Inspired by tools like TruffleHog, GitLeaks, and Detect-Secrets
-- Built with ❤️ and a passion for security
+**Adham Rashed**
+Cybersecurity Researcher
+[adhampx.com](https://adhampx.com) | [GitHub](https://github.com/adhamcybersec)
 
 ---
 
-**⚠️ Security Notice**: This tool helps identify secrets but is not a replacement for proper secret management practices. Always use dedicated secret management solutions (HashiCorp Vault, AWS Secrets Manager, etc.) for production systems.
+**Security Notice**: SecretGuard helps identify secrets but is not a replacement for proper secret management. Always use dedicated solutions (HashiCorp Vault, AWS Secrets Manager, etc.) for production systems.
