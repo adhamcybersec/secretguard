@@ -1,4 +1,5 @@
 """Tests for new secret patterns added in v0.3.0"""
+
 from pathlib import Path
 import pytest
 from secretguard.detectors.regex_detector import RegexDetector
@@ -47,7 +48,7 @@ def test_mailgun_api_key(detector):
 
 
 def test_npm_token(detector):
-    line = '//registry.npmjs.org/:_authToken=npm_a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3abcd'
+    line = "//registry.npmjs.org/:_authToken=npm_a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3abcd"
     findings = detector.detect(line, 1, Path(".npmrc"))
     assert any("npm" in f.secret_type.lower() for f in findings)
 

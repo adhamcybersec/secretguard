@@ -28,7 +28,7 @@ def test_high_entropy_detection(detector):
     """Test detection of high-entropy strings"""
     line = 'SECRET_KEY="dG9rZW4xMjM0NTY3ODkwYWJjZGVmZ2hpamts"'
     findings = detector.detect(line, 15, Path("config.py"))
-    
+
     # Should detect the base64-like string
     assert len(findings) >= 1
     assert all(isinstance(f.confidence, float) for f in findings)
@@ -50,6 +50,6 @@ def test_candidate_extraction(detector):
     """Test extraction of candidate strings"""
     line = 'api_key = "some_long_random_key_12345678901234567890"'
     candidates = extract_candidates(line)
-    
+
     assert len(candidates) > 0
     assert any("some_long_random_key" in c for c in candidates)

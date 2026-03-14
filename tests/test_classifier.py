@@ -1,4 +1,5 @@
 """Tests for ML classifier"""
+
 from secretguard.ml.classifier import SecretClassifier
 
 
@@ -24,6 +25,8 @@ def test_classifier_untrained_returns_none():
 def test_classifier_batch_predict():
     clf = SecretClassifier()
     clf.train()
-    results = clf.predict_batch(["AKIAIOSFODNN7REALKEY", "hello", "ghp_abcdefghijklmnopqrstuvwxyz123456"])
+    results = clf.predict_batch(
+        ["AKIAIOSFODNN7REALKEY", "hello", "ghp_abcdefghijklmnopqrstuvwxyz123456"]
+    )
     assert len(results) == 3
     assert results[0] > results[1]  # Secret should score higher than "hello"

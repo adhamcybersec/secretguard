@@ -5,7 +5,6 @@ Pre-commit hook installer
 import subprocess
 from pathlib import Path
 
-
 PRE_COMMIT_HOOK = """#!/bin/bash
 # SecretGuard pre-commit hook
 # Prevents committing secrets to git
@@ -66,15 +65,15 @@ class PreCommitInstaller:
         Consider using the `pre-commit` framework instead.
         See .pre-commit-hooks.yaml for integration details.
     """
-    
+
     @staticmethod
     def install(repo_path: Path = Path.cwd()) -> bool:
         """
         Install SecretGuard pre-commit hook
-        
+
         Args:
             repo_path: Path to git repository (default: current directory)
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -82,12 +81,12 @@ class PreCommitInstaller:
         git_dir = repo_path / ".git"
         if not git_dir.exists():
             raise ValueError(f"{repo_path} is not a git repository")
-        
+
         hooks_dir = git_dir / "hooks"
         hooks_dir.mkdir(exist_ok=True)
-        
+
         hook_path = hooks_dir / "pre-commit"
-        
+
         # Check if hook already exists
         if hook_path.exists():
             existing_content = hook_path.read_text()
@@ -95,55 +94,55 @@ class PreCommitInstaller:
                 return False  # Already installed
             else:
                 # Backup existing hook
-                backup_path = hook_path.with_suffix('.backup')
+                backup_path = hook_path.with_suffix(".backup")
                 hook_path.rename(backup_path)
                 print(f"⚠️  Existing pre-commit hook backed up to {backup_path}")
-        
+
         # Write new hook
         hook_path.write_text(PRE_COMMIT_HOOK)
         hook_path.chmod(0o755)  # Make executable
-        
+
         return True
-    
+
     @staticmethod
     def uninstall(repo_path: Path = Path.cwd()) -> bool:
         """
         Uninstall SecretGuard pre-commit hook
-        
+
         Args:
             repo_path: Path to git repository
-            
+
         Returns:
             True if hook was removed, False if not found
         """
         hook_path = repo_path / ".git" / "hooks" / "pre-commit"
-        
+
         if not hook_path.exists():
             return False
-        
+
         # Check if it's our hook
         content = hook_path.read_text()
         if "SecretGuard" not in content:
             return False
-        
+
         # Remove hook
         hook_path.unlink()
-        
+
         # Restore backup if exists
-        backup_path = hook_path.with_suffix('.backup')
+        backup_path = hook_path.with_suffix(".backup")
         if backup_path.exists():
             backup_path.rename(hook_path)
             print(f"✅ Restored original pre-commit hook from backup")
-        
+
         return True
-    
+
     @staticmethod
     def is_installed(repo_path: Path = Path.cwd()) -> bool:
         """Check if SecretGuard pre-commit hook is installed"""
         hook_path = repo_path / ".git" / "hooks" / "pre-commit"
-        
+
         if not hook_path.exists():
             return False
-        
+
         content = hook_path.read_text()
         return "SecretGuard" in content

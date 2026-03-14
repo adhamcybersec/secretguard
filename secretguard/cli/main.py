@@ -29,7 +29,9 @@ console = Console()
 @app.command()
 def scan(
     path: Path = typer.Argument(".", help="Path to scan for secrets"),
-    format: str = typer.Option("console", help="Output format: console, json, markdown, html, sarif"),
+    format: str = typer.Option(
+        "console", help="Output format: console, json, markdown, html, sarif"
+    ),
     output: Optional[Path] = typer.Option(None, help="Output file path"),
     exclude: Optional[List[str]] = typer.Option(None, help="Patterns to exclude"),
     confidence: Optional[float] = typer.Option(None, help="Minimum confidence threshold (0.0-1.0)"),
@@ -39,7 +41,9 @@ def scan(
     no_config: bool = typer.Option(False, help="Ignore config file"),
     staged: bool = typer.Option(False, "--staged", help="Only scan git-staged files"),
     no_ml: bool = typer.Option(False, "--no-ml", help="Disable ML-based detection (faster scans)"),
-    verify: bool = typer.Option(False, "--verify", help="Attempt live verification of detected credentials"),
+    verify: bool = typer.Option(
+        False, "--verify", help="Attempt live verification of detected credentials"
+    ),
 ) -> None:
     """
     Scan a directory for exposed secrets and credentials
@@ -58,16 +62,18 @@ def scan(
         except Exception as e:
             console.print(f"[yellow]⚠️  Config file error: {e}[/yellow]")
             cfg = None
-    
+
     # Merge config with CLI args (CLI args take precedence)
     exclude_patterns = list(exclude) if exclude else []
     if cfg and cfg.exclude:
         exclude_patterns.extend(cfg.exclude)
-    
-    confidence_threshold = confidence if confidence is not None else (cfg.confidence_threshold if cfg else 0.75)
-    
+
+    confidence_threshold = (
+        confidence if confidence is not None else (cfg.confidence_threshold if cfg else 0.75)
+    )
+
     console.print(f"[cyan]🔍 Scanning {path}...[/cyan]")
-    
+
     # Initialize scanner
     engine = ScanEngine(
         exclude_patterns=exclude_patterns,
@@ -76,7 +82,7 @@ def scan(
         custom_patterns=cfg.custom_patterns if cfg else [],
         use_ml=not no_ml,
     )
-    
+
     # Run scan
     if staged:
         staged_files = engine.get_staged_files(path)
@@ -87,19 +93,19 @@ def scan(
         results = engine.scan_files(staged_files)
     else:
         results = engine.scan(path)
-    
+
     # Apply allowlist filtering
     if cfg and (cfg.allowlist or cfg.ignore_patterns):
         allowlist_mgr = AllowlistManager(cfg.allowlist, cfg.ignore_patterns)
         original_count = len(results.findings)
         results.findings = [f for f in results.findings if not allowlist_mgr.should_ignore(f)]
         filtered_count = original_count - len(results.findings)
-        
+
         if filtered_count > 0 and verbose:
             console.print(f"[dim]✓ Filtered {filtered_count} allowlisted findings[/dim]")
-        
+
         results.total_secrets = len(results.findings)
-    
+
     # Live credential verification
     if verify and results.findings:
         from secretguard.verifiers.github_verifier import GitHubVerifier
@@ -112,7 +118,9 @@ def scan(
                 if v.can_verify(finding.secret_type, finding.matched_text):
                     vr = v.verify(finding.matched_text)
                     finding.is_verified = vr.is_valid
-                    status = "[red]ACTIVE[/red]" if vr.is_valid else "[green]inactive/invalid[/green]"
+                    status = (
+                        "[red]ACTIVE[/red]" if vr.is_valid else "[green]inactive/invalid[/green]"
+                    )
                     if vr.error:
                         status = f"[yellow]error: {vr.error}[/yellow]"
                     console.print(f"  {v.service_name}: {status} — {vr.detail}")
@@ -159,10 +167,12 @@ def scan(
     else:
         console.print(f"[red]Error: Unknown format '{format}'[/red]")
         raise typer.Exit(code=1)
-    
+
     # Display scan errors if any
     if results.scan_errors:
-        console.print(f"\n[yellow]Warning: {len(results.scan_errors)} file(s) had scan errors[/yellow]")
+        console.print(
+            f"\n[yellow]Warning: {len(results.scan_errors)} file(s) had scan errors[/yellow]"
+        )
         if verbose:
             for err in results.scan_errors:
                 console.print(f"  [dim]{err}[/dim]")
@@ -192,9 +202,9 @@ def display_console_results(results, include_remediation: bool = False) -> None:
             finding.severity.value.upper(),
             f"{finding.confidence:.2%}",
         )
-    
+
     console.print(table)
-    
+
     if include_remediation and results.findings:
         console.print("\n[bold cyan]Remediation Suggestions:[/bold cyan]")
         for idx, finding in enumerate(results.findings, 1):
@@ -290,6 +300,7 @@ def ml_evaluate() -> None:
 def version() -> None:
     """Show version information"""
     from secretguard import __version__
+
     console.print(f"SecretGuard v{__version__}")
 
 
@@ -297,11 +308,11 @@ def version() -> None:
 def init() -> None:
     """Initialize SecretGuard configuration in current directory"""
     config_path = Path(".secretguard.yml")
-    
+
     if config_path.exists():
         console.print("[yellow]⚠️  .secretguard.yml already exists[/yellow]")
         return
-    
+
     ConfigLoader.create_default_config(config_path)
     console.print("[green]✅ Created .secretguard.yml[/green]")
     console.print("[dim]Edit this file to customize SecretGuard behavior[/dim]")

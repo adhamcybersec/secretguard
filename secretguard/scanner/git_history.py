@@ -39,15 +39,24 @@ class GitHistoryScanner:
         results = ScanResults()
 
         cmd = [
-            "git", "log", "-p", f"--max-count={max_commits}",
-            "--diff-filter=A", "--no-merges", "--format=commit %H%nauthor %an",
+            "git",
+            "log",
+            "-p",
+            f"--max-count={max_commits}",
+            "--diff-filter=A",
+            "--no-merges",
+            "--format=commit %H%nauthor %an",
         ]
         if branch:
             cmd.append(branch)
 
         try:
             proc = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=repo_path, timeout=120,
+                cmd,
+                capture_output=True,
+                text=True,
+                cwd=repo_path,
+                timeout=120,
             )
             if proc.returncode != 0:
                 results.scan_errors.append(f"git log failed: {proc.stderr.strip()}")

@@ -17,7 +17,7 @@ from secretguard.config.allowlist import AllowlistManager
 
 class ScanEngine:
     """Main scanning engine that orchestrates detection"""
-    
+
     def __init__(
         self,
         exclude_patterns: Optional[List[str]] = None,
@@ -34,34 +34,35 @@ class ScanEngine:
         self.regex_detector = RegexDetector(custom_patterns=custom_patterns)
         self.entropy_detector = EntropyDetector()
         self.ml_detector = MLDetector() if use_ml else None
-    
+
     def scan(self, path: Path) -> ScanResults:
         """
         Scan a directory or file for secrets
-        
+
         Args:
             path: Path to scan (file or directory)
-            
+
         Returns:
             ScanResults object with all findings
         """
         import time
+
         start_time = time.time()
-        
+
         results = ScanResults()
-        
+
         if path.is_file():
             self._scan_file(path, results)
         elif path.is_dir():
             self._scan_directory(path, results)
         else:
             raise ValueError(f"Path {path} is neither a file nor directory")
-        
+
         results.scan_duration = time.time() - start_time
         results.total_secrets = len(results.findings)
-        
+
         return results
-    
+
     def _load_gitignore(self, directory: Path):
         """Load .gitignore patterns using pathspec"""
         gitignore = directory / ".gitignore"
@@ -97,19 +98,19 @@ class ScanEngine:
                 continue
 
             self._scan_file(file_path, results)
-    
+
     def _scan_file(self, file_path: Path, results: ScanResults) -> None:
         """Scan a single file for secrets"""
         try:
             # Skip binary files
             if self._is_binary(file_path):
                 return
-            
+
             results.files_scanned += 1
-            
+
             if self.verbose:
                 print(f"Scanning: {file_path}")
-            
+
             # Task 8: Stream file line-by-line instead of loading entire file
             seen: set[tuple[int, str]] = set()
 
@@ -148,15 +149,16 @@ class ScanEngine:
                                 if key not in seen:
                                     seen.add(key)
                                     results.findings.append(finding)
-        
+
         except Exception as e:
             results.scan_errors.append(f"{file_path}: {e}")
             if self.verbose:
                 print(f"Error scanning {file_path}: {e}")
-    
+
     def scan_files(self, files: List[Path]) -> ScanResults:
         """Scan a specific list of files"""
         import time
+
         start_time = time.time()
         results = ScanResults()
 
@@ -171,10 +173,13 @@ class ScanEngine:
     def get_staged_files(self, repo_path: Path) -> List[Path]:
         """Get list of staged files from git"""
         import subprocess
+
         try:
             result = subprocess.run(
                 ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
-                capture_output=True, text=True, cwd=repo_path
+                capture_output=True,
+                text=True,
+                cwd=repo_path,
             )
             if result.returncode != 0:
                 return []
@@ -185,7 +190,7 @@ class ScanEngine:
     def _should_exclude(self, file_path: Path) -> bool:
         """Check if a file should be excluded based on patterns"""
         path_str = str(file_path)
-        
+
         # Common exclusions
         common_excludes = [
             ".git/",
@@ -198,18 +203,18 @@ class ScanEngine:
             ".dll",
             ".exe",
         ]
-        
+
         for pattern in common_excludes + self.exclude_patterns:
             if pattern in path_str:
                 return True
-        
+
         return False
-    
+
     def _is_binary(self, file_path: Path) -> bool:
         """Check if a file is binary"""
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 chunk = f.read(1024)
-                return b'\x00' in chunk
+                return b"\x00" in chunk
         except Exception:
             return True

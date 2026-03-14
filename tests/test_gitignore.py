@@ -1,4 +1,5 @@
 """Tests for pathspec/gitignore integration"""
+
 import tempfile
 from pathlib import Path
 from secretguard.scanner.engine import ScanEngine

@@ -1,4 +1,5 @@
 """Tests for staged-files scanning"""
+
 import tempfile
 from pathlib import Path
 from secretguard.scanner.engine import ScanEngine
@@ -19,7 +20,7 @@ def test_scan_specific_files():
         secret_file.write_text('password = "SuperSecret123!"\n')
 
         clean_file = Path(tmpdir) / "clean.py"
-        clean_file.write_text('x = 42\n')
+        clean_file.write_text("x = 42\n")
 
         engine = ScanEngine(confidence_threshold=0.0)
         results = engine.scan_files([secret_file])

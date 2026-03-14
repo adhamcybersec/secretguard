@@ -137,7 +137,6 @@ _NON_SECRETS = [
     ("router.get('/api/users', handler)", 0),
     ("export default function App()", 0),
     ("package main", 0),
-
     # CSS/HTML (10)
     ("Content-Type: application/json", 0),
     ("background-color: #ffffff", 0),
@@ -149,7 +148,6 @@ _NON_SECRETS = [
     ("@media (max-width: 768px)", 0),
     ("text-decoration: none; color: #333", 0),
     ("padding: 16px 24px; gap: 12px", 0),
-
     # UUIDs (10)
     ("550e8400-e29b-41d4-a716-446655440000", 0),
     ("6ba7b810-9dad-11d1-80b4-00c04fd430c8", 0),
@@ -161,7 +159,6 @@ _NON_SECRETS = [
     ("b2f3d4e5-6a7b-8c9d-0e1f-2a3b4c5d6e7f", 0),
     ("d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a", 0),
     ("01234567-89ab-cdef-0123-456789abcdef", 0),
-
     # Git hashes (10)
     ("a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0", 0),
     ("da39a3ee5e6b4b0d3255bfef95601890afd80709", 0),
@@ -173,7 +170,6 @@ _NON_SECRETS = [
     ("356a192b7913b04c54574d18c28d46e6395428ab", 0),
     ("da4b9237bacccdf19c0760cab7aec4a8359010b0", 0),
     ("77de68daecd823babbb58edb1c8e14d7106e83bb", 0),
-
     # URLs (10)
     ("https://example.com/api/v1/users", 0),
     ("https://cdn.jsdelivr.net/npm/package", 0),
@@ -185,14 +181,12 @@ _NON_SECRETS = [
     ("https://stackoverflow.com/questions/12345", 0),
     ("https://www.google.com/search?q=python", 0),
     ("https://raw.githubusercontent.com/user/repo/main/file", 0),
-
     # Emails (5)
     ("user@example.com", 0),
     ("admin@company.org", 0),
     ("noreply@github.com", 0),
     ("support@service.io", 0),
     ("developer@team.dev", 0),
-
     # Timestamps (10)
     ("2024-01-15T10:30:00Z", 0),
     ("2025-12-31T23:59:59Z", 0),
@@ -204,14 +198,12 @@ _NON_SECRETS = [
     ("2024-01-15 10:30:00+00:00", 0),
     ("20240115T103000Z", 0),
     ("Jan 15, 2024 10:30 AM", 0),
-
     # Version strings (5)
     ("v1.2.3-beta.4+build.567", 0),
     ("1.0.0-alpha.1", 0),
     ("v22.04.1-LTS", 0),
     ("3.12.0rc1", 0),
     ("v0.5.0", 0),
-
     # File paths (10)
     ("/usr/local/bin/python3", 0),
     ("src/components/Header.tsx", 0),
@@ -223,7 +215,6 @@ _NON_SECRETS = [
     ("./dist/bundle.min.js", 0),
     ("/opt/app/config/settings.yml", 0),
     ("../../shared/types/index.ts", 0),
-
     # Benign base64 (10)
     ("VGhlIHF1aWNrIGJyb3duIGZveA==", 0),
     ("SGVsbG8gV29ybGQ=", 0),
@@ -235,7 +226,6 @@ _NON_SECRETS = [
     ("YXBwbGljYXRpb24vanNvbg==", 0),
     ("dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04", 0),
     ("The quick brown fox jumps over the lazy dog", 0),
-
     # Common programming values (10)
     ("application/x-www-form-urlencoded", 0),
     ("Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 0),

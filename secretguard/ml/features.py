@@ -2,10 +2,21 @@
 
 from secretguard.utils.crypto import shannon_entropy
 
-
 SECRET_PREFIXES = [
-    "AKIA", "ghp_", "gho_", "github_pat_", "glpat-", "sk_live_", "sk_test_",
-    "SG.", "xoxb-", "xoxp-", "npm_", "pypi-", "SK", "key-",
+    "AKIA",
+    "ghp_",
+    "gho_",
+    "github_pat_",
+    "glpat-",
+    "sk_live_",
+    "sk_test_",
+    "SG.",
+    "xoxb-",
+    "xoxp-",
+    "npm_",
+    "pypi-",
+    "SK",
+    "key-",
 ]
 
 

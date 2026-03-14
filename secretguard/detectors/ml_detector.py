@@ -27,15 +27,17 @@ class MLDetector:
 
         for candidate, score in zip(candidates, scores):
             if score >= self.threshold:
-                findings.append(SecretFinding(
-                    file_path=file_path,
-                    line_number=line_num,
-                    line_content=line.strip(),
-                    secret_type="ML-Detected Secret",
-                    confidence=round(score, 2),
-                    matched_text=candidate,
-                    severity=Severity.MEDIUM if score < 0.9 else Severity.HIGH,
-                    remediation_suggestion="ML model flagged this as a potential secret. Verify and move to secret management if confirmed.",
-                ))
+                findings.append(
+                    SecretFinding(
+                        file_path=file_path,
+                        line_number=line_num,
+                        line_content=line.strip(),
+                        secret_type="ML-Detected Secret",
+                        confidence=round(score, 2),
+                        matched_text=candidate,
+                        severity=Severity.MEDIUM if score < 0.9 else Severity.HIGH,
+                        remediation_suggestion="ML model flagged this as a potential secret. Verify and move to secret management if confirmed.",
+                    )
+                )
 
         return findings

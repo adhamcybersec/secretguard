@@ -1,4 +1,5 @@
 """Tests for pre-commit hook installer"""
+
 import tempfile
 from pathlib import Path
 import pytest

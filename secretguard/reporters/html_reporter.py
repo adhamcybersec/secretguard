@@ -29,15 +29,17 @@ class HTMLReporter:
 
         findings_data = []
         for finding in results.findings:
-            findings_data.append({
-                'file_path': str(finding.file_path),
-                'line_number': finding.line_number,
-                'line_content': mask_line_content(finding.line_content, finding.matched_text),
-                'secret_type': finding.secret_type,
-                'confidence': finding.confidence,
-                'severity': finding.severity.value,
-                'remediation_suggestion': finding.remediation_suggestion,
-            })
+            findings_data.append(
+                {
+                    "file_path": str(finding.file_path),
+                    "line_number": finding.line_number,
+                    "line_content": mask_line_content(finding.line_content, finding.matched_text),
+                    "secret_type": finding.secret_type,
+                    "confidence": finding.confidence,
+                    "severity": finding.severity.value,
+                    "remediation_suggestion": finding.remediation_suggestion,
+                }
+            )
 
         html = template.render(
             timestamp=datetime.now().strftime("%B %d, %Y at %H:%M:%S"),

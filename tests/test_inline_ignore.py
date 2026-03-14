@@ -1,11 +1,12 @@
 """Tests for inline ignore support in scanner"""
+
 import tempfile
 from pathlib import Path
 from secretguard.scanner.engine import ScanEngine
 
 
 def test_inline_ignore_hash_comment():
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write('password = "SuperSecret123!"  # secretguard:ignore\n')
         f.write('api_key = "AKIAIOSFODNN7REALKEY"\n')
         tmp = Path(f.name)
@@ -20,7 +21,7 @@ def test_inline_ignore_hash_comment():
 
 
 def test_inline_ignore_slash_comment():
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".js", delete=False) as f:
         f.write('const token = "ghp_abcdefghijklmnopqrstuvwxyzABCDEF1234"; // secretguard:ignore\n')
         tmp = Path(f.name)
 
@@ -32,7 +33,7 @@ def test_inline_ignore_slash_comment():
 
 
 def test_sg_ignore_shorthand():
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write('password = "SuperSecret123!"  # sg:ignore\n')
         tmp = Path(f.name)
 

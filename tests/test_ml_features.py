@@ -1,4 +1,5 @@
 """Tests for ML feature extraction"""
+
 from secretguard.ml.features import extract_features
 
 

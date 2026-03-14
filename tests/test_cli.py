@@ -1,4 +1,5 @@
 """Tests for CLI commands"""
+
 import os
 import tempfile
 from pathlib import Path
@@ -21,7 +22,7 @@ def test_scan_nonexistent_path():
 
 
 def test_scan_with_secrets():
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write('key = "AKIAIOSFODNN7REALKEY"\n')
         tmp = Path(f.name)
     try:

@@ -12,9 +12,8 @@ class GitHubVerifier(BaseVerifier):
     service_name = "GitHub"
 
     def can_verify(self, secret_type: str, matched_text: str) -> bool:
-        return (
-            "github" in secret_type.lower()
-            or matched_text.startswith(("ghp_", "gho_", "github_pat_"))
+        return "github" in secret_type.lower() or matched_text.startswith(
+            ("ghp_", "gho_", "github_pat_")
         )
 
     def verify(self, matched_text: str) -> VerificationResult:

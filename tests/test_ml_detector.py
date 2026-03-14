@@ -1,4 +1,5 @@
 """Tests for ML detector integration"""
+
 from pathlib import Path
 from secretguard.detectors.ml_detector import MLDetector
 
@@ -14,7 +15,7 @@ def test_ml_detector_finds_secrets():
 
 def test_ml_detector_ignores_normal_code():
     detector = MLDetector()
-    line = 'x = calculate_total(items)'
+    line = "x = calculate_total(items)"
     findings = detector.detect(line, 1, Path("app.py"))
     assert len(findings) == 0
 

@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 
 class Severity(str, Enum):
     """Severity levels for secret findings"""
+
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -19,6 +20,7 @@ class Severity(str, Enum):
 @dataclass
 class SecretFinding:
     """Represents a detected secret"""
+
     file_path: Path
     line_number: int
     line_content: str
@@ -35,6 +37,7 @@ class SecretFinding:
 @dataclass
 class ScanResults:
     """Results from a scan operation"""
+
     findings: List[SecretFinding] = field(default_factory=list)
     files_scanned: int = 0
     total_secrets: int = 0

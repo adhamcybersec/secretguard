@@ -1,4 +1,5 @@
 """Tests for all reporters"""
+
 import json
 import tempfile
 from pathlib import Path
@@ -12,14 +13,19 @@ def _make_results():
     return ScanResults(
         findings=[
             SecretFinding(
-                file_path=Path("app.py"), line_number=5,
-                line_content='key = "secret"', secret_type="Generic API Key",
-                confidence=0.85, matched_text="secret",
+                file_path=Path("app.py"),
+                line_number=5,
+                line_content='key = "secret"',
+                secret_type="Generic API Key",
+                confidence=0.85,
+                matched_text="secret",
                 severity=Severity.HIGH,
                 remediation_suggestion="Use env vars",
             )
         ],
-        files_scanned=10, total_secrets=1, scan_duration=0.5,
+        files_scanned=10,
+        total_secrets=1,
+        scan_duration=0.5,
     )
 
 
@@ -35,7 +41,7 @@ def test_json_reporter_includes_severity():
 
 
 def test_json_reporter_save():
-    with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
         path = Path(f.name)
     try:
         reporter = JSONReporter()

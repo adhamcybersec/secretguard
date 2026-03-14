@@ -27,7 +27,7 @@ def test_file_line_allowlist(sample_finding):
     """Test allowlist matching by file and line"""
     entry = AllowlistEntry(file="config.py", line=10, reason="Test")
     manager = AllowlistManager([entry], [])
-    
+
     assert manager.should_ignore(sample_finding) is True
 
 
@@ -35,7 +35,7 @@ def test_file_only_allowlist(sample_finding):
     """Test allowlist matching by file only"""
     entry = AllowlistEntry(file="config.py", reason="All config secrets")
     manager = AllowlistManager([entry], [])
-    
+
     assert manager.should_ignore(sample_finding) is True
 
 
@@ -43,14 +43,14 @@ def test_pattern_allowlist(sample_finding):
     """Test allowlist matching by pattern"""
     entry = AllowlistEntry(pattern="secret123", reason="Known test value")
     manager = AllowlistManager([entry], [])
-    
+
     assert manager.should_ignore(sample_finding) is True
 
 
 def test_ignore_patterns(sample_finding):
     """Test ignore patterns"""
     manager = AllowlistManager([], ["secret123"])
-    
+
     assert manager.should_ignore(sample_finding) is True
 
 
@@ -58,7 +58,7 @@ def test_no_match(sample_finding):
     """Test when nothing matches"""
     entry = AllowlistEntry(file="other.py", line=20)
     manager = AllowlistManager([entry], ["other_pattern"])
-    
+
     assert manager.should_ignore(sample_finding) is False
 
 

@@ -1,4 +1,5 @@
 """Tests for SARIF reporter"""
+
 import json
 from pathlib import Path
 from secretguard.reporters.sarif_reporter import SARIFReporter
@@ -28,7 +29,10 @@ def test_sarif_valid_json():
     output = reporter.generate(results)
     sarif = json.loads(output)
 
-    assert sarif["$schema"] == "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json"
+    assert (
+        sarif["$schema"]
+        == "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json"
+    )
     assert sarif["version"] == "2.1.0"
     assert len(sarif["runs"]) == 1
     assert len(sarif["runs"][0]["results"]) == 1
@@ -38,12 +42,18 @@ def test_sarif_severity_mapping():
     results = ScanResults(
         findings=[
             SecretFinding(
-                file_path=Path("t.py"), line_number=1, line_content="x",
-                secret_type="Test", confidence=0.9, matched_text="x",
+                file_path=Path("t.py"),
+                line_number=1,
+                line_content="x",
+                secret_type="Test",
+                confidence=0.9,
+                matched_text="x",
                 severity=Severity.CRITICAL,
             )
         ],
-        files_scanned=1, total_secrets=1, scan_duration=0.1,
+        files_scanned=1,
+        total_secrets=1,
+        scan_duration=0.1,
     )
 
     reporter = SARIFReporter()

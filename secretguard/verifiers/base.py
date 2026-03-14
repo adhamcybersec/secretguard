@@ -7,6 +7,7 @@ from typing import Optional
 @dataclass
 class VerificationResult:
     """Result of a live credential verification attempt."""
+
     is_valid: bool
     service: str
     detail: str = ""

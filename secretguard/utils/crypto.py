@@ -31,11 +31,11 @@ def extract_candidates(line: str) -> List[str]:
         candidates.append(match.group(1))
 
     # Pattern 2: Assignment values
-    for match in re.finditer(r'=\s*([A-Za-z0-9+/=_\-]{16,200})(?:\s|$|;|,)', line):
+    for match in re.finditer(r"=\s*([A-Za-z0-9+/=_\-]{16,200})(?:\s|$|;|,)", line):
         candidates.append(match.group(1))
 
     # Pattern 3: Base64-like strings
-    for match in re.finditer(r'\b([A-Za-z0-9+/]{20,}={0,2})\b', line):
+    for match in re.finditer(r"\b([A-Za-z0-9+/]{20,}={0,2})\b", line):
         candidates.append(match.group(1))
 
     return candidates
