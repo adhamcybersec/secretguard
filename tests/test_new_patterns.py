@@ -3,7 +3,6 @@
 from pathlib import Path
 import pytest
 from secretguard.detectors.regex_detector import RegexDetector
-from secretguard.models import Severity
 
 
 @pytest.fixture

@@ -4,7 +4,6 @@ JSON report generation
 
 import json
 from pathlib import Path
-from typing import Any, Dict
 
 from secretguard.models import ScanResults
 from secretguard.utils.masking import mask_secret, mask_line_content

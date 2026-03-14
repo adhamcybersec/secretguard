@@ -3,7 +3,7 @@
 from pathlib import Path
 from datetime import datetime
 from secretguard.models import ScanResults
-from secretguard.utils.masking import mask_secret, mask_line_content
+from secretguard.utils.masking import mask_line_content
 from secretguard.utils.io import save_report
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"

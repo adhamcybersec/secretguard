@@ -4,11 +4,10 @@ Scanner Engine - Core scanning logic
 
 from pathlib import Path
 from typing import List, Optional
-import re
 
 import pathspec
 
-from secretguard.models import SecretFinding, ScanResults
+from secretguard.models import ScanResults
 from secretguard.detectors.regex_detector import RegexDetector
 from secretguard.detectors.entropy_detector import EntropyDetector
 from secretguard.detectors.ml_detector import MLDetector

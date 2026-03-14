@@ -7,7 +7,6 @@ from typing import Optional, List
 import typer
 from rich.console import Console
 from rich.table import Table
-from rich import print as rprint
 
 from secretguard.scanner.engine import ScanEngine
 from secretguard.reporters.json_reporter import JSONReporter

@@ -4,7 +4,7 @@ Markdown report generation
 
 from pathlib import Path
 from secretguard.models import ScanResults
-from secretguard.utils.masking import mask_secret, mask_line_content
+from secretguard.utils.masking import mask_secret
 from secretguard.utils.io import save_report
 
 

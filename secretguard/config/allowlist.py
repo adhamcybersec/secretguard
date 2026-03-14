@@ -3,7 +3,6 @@ Allowlist manager for ignoring known false positives
 """
 
 import re
-from pathlib import Path
 from typing import List
 
 from secretguard.models import SecretFinding

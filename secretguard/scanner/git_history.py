@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from secretguard.models import SecretFinding, ScanResults
+from secretguard.models import ScanResults
 from secretguard.detectors.regex_detector import RegexDetector
 from secretguard.detectors.entropy_detector import EntropyDetector
 from secretguard.config.allowlist import AllowlistManager

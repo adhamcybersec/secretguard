@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import List
 
-from secretguard.models import SecretFinding, Severity
+from secretguard.models import SecretFinding
 from secretguard.detectors.patterns import ALL_PATTERNS
 
 

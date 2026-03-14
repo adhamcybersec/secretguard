@@ -2,7 +2,6 @@
 Pre-commit hook installer
 """
 
-import subprocess
 from pathlib import Path
 
 PRE_COMMIT_HOOK = """#!/bin/bash
@@ -132,7 +131,7 @@ class PreCommitInstaller:
         backup_path = hook_path.with_suffix(".backup")
         if backup_path.exists():
             backup_path.rename(hook_path)
-            print(f"✅ Restored original pre-commit hook from backup")
+            print("✅ Restored original pre-commit hook from backup")
 
         return True
 
