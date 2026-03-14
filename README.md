@@ -238,6 +238,16 @@ The marker must appear after a comment delimiter (`#`, `//`, `/*`, `--`) to prev
 - **Hardened ignores**: `secretguard:ignore` markers only work inside comments, not string values
 - **Opt-in verification**: Live credential checks require explicit `--verify` flag
 
+## Roadmap
+
+SecretGuard is actively developed. Here's what's coming next:
+
+- **v0.9.0** — MCP server for AI agent integration (Claude Code, Cursor, Windsurf), Python SDK, VS Code extension
+- **v1.0.0** — PyPI stable release, Docker image, 90%+ test coverage, documentation site
+- **v1.1.0** — Transformer-based ML model, additional credential verifiers (Stripe, Google, Slack), custom ML training
+- **v1.2.0** — Team web dashboard, policy engine, multi-repo scanning, secret rotation assistance
+- **v1.3.0** — Bitbucket/Jenkins integrations, Terraform/IaC scanning, Jupyter notebook support
+
 ## Development
 
 ```bash
