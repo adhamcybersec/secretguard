@@ -4,6 +4,8 @@ Markdown report generation
 
 from pathlib import Path
 from secretguard.models import ScanResults
+from secretguard.utils.masking import mask_secret, mask_line_content
+from secretguard.utils.io import save_report
 
 
 class MarkdownReporter:
@@ -54,7 +56,7 @@ class MarkdownReporter:
                         "",
                         f"**Type**: {finding.secret_type}",
                         "",
-                        f"**Matched**: `{finding.matched_text[:100]}`",
+                        f"**Matched**: `{mask_secret(finding.matched_text)}`",
                         "",
                         f"**Recommendation**: {finding.remediation_suggestion}",
                         "",
@@ -69,5 +71,5 @@ class MarkdownReporter:
         return "\n".join(lines)
     
     def save(self, report_data: str, output_path: Path) -> None:
-        """Save Markdown report to file"""
-        output_path.write_text(report_data)
+        """Save Markdown report to file with secure permissions"""
+        save_report(report_data, output_path)

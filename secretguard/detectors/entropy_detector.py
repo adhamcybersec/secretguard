@@ -2,12 +2,12 @@
 Entropy-based secret detection
 """
 
-import math
 import re
 from pathlib import Path
 from typing import List
 
 from secretguard.models import SecretFinding, Severity
+from secretguard.utils.crypto import shannon_entropy, extract_candidates
 
 
 class EntropyDetector:
@@ -33,10 +33,10 @@ class EntropyDetector:
         findings = []
         
         # Extract potential secret strings (quoted, assigned, etc.)
-        candidates = self._extract_candidates(line)
-        
+        candidates = extract_candidates(line)
+
         for candidate in candidates:
-            entropy = self._calculate_entropy(candidate)
+            entropy = shannon_entropy(candidate)
             
             if entropy >= self.MIN_ENTROPY and self.MIN_LENGTH <= len(candidate) <= self.MAX_LENGTH:
                 # Calculate confidence based on entropy and other factors
@@ -56,58 +56,6 @@ class EntropyDetector:
                     findings.append(finding)
         
         return findings
-    
-    def _extract_candidates(self, line: str) -> List[str]:
-        """Extract potential secret strings from a line"""
-        candidates = []
-        
-        # Pattern 1: Quoted strings
-        quoted_pattern = r'["\']([A-Za-z0-9+/=_\-]{16,200})["\']'
-        for match in re.finditer(quoted_pattern, line):
-            candidates.append(match.group(1))
-        
-        # Pattern 2: Assignment values
-        assignment_pattern = r'=\s*([A-Za-z0-9+/=_\-]{16,200})(?:\s|$|;|,)'
-        for match in re.finditer(assignment_pattern, line):
-            candidates.append(match.group(1))
-        
-        # Pattern 3: Base64-like strings
-        base64_pattern = r'\b([A-Za-z0-9+/]{20,}={0,2})\b'
-        for match in re.finditer(base64_pattern, line):
-            candidates.append(match.group(1))
-        
-        return candidates
-    
-    def _calculate_entropy(self, string: str) -> float:
-        """
-        Calculate Shannon entropy of a string
-        
-        Higher entropy = more randomness = more likely to be a secret
-        
-        Args:
-            string: Input string
-            
-        Returns:
-            Shannon entropy value
-        """
-        if not string:
-            return 0.0
-        
-        # Count character frequency
-        char_counts = {}
-        for char in string:
-            char_counts[char] = char_counts.get(char, 0) + 1
-        
-        # Calculate entropy
-        entropy = 0.0
-        string_len = len(string)
-        
-        for count in char_counts.values():
-            probability = count / string_len
-            if probability > 0:
-                entropy -= probability * math.log2(probability)
-        
-        return entropy
     
     def _calculate_confidence(self, candidate: str, entropy: float) -> float:
         """

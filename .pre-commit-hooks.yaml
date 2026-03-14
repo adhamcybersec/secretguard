@@ -1,0 +1,7 @@
+- id: secretguard
+  name: SecretGuard
+  description: Scan for exposed secrets and credentials
+  entry: secretguard scan
+  language: python
+  types: [text]
+  stages: [pre-commit]

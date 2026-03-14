@@ -62,6 +62,7 @@ build/
 # Reports (scan outputs)
 *.json
 *.html
+!secretguard/reporters/templates/*.html
 security-report.*
 scan-results.*
 

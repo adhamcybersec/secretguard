@@ -1,11 +1,11 @@
 """ML-based secret detection"""
 
-import re
 from pathlib import Path
 from typing import List
 
 from secretguard.models import SecretFinding, Severity
 from secretguard.ml.classifier import SecretClassifier
+from secretguard.utils.crypto import extract_candidates
 
 
 class MLDetector:
@@ -17,7 +17,7 @@ class MLDetector:
         self._classifier.train()
 
     def detect(self, line: str, line_num: int, file_path: Path) -> List[SecretFinding]:
-        candidates = self._extract_candidates(line)
+        candidates = list(set(extract_candidates(line)))
         findings = []
 
         if not candidates:
@@ -39,12 +39,3 @@ class MLDetector:
                 ))
 
         return findings
-
-    def _extract_candidates(self, line: str) -> List[str]:
-        """Extract candidate strings from a line."""
-        candidates = []
-        for match in re.finditer(r'["\']([A-Za-z0-9+/=_\-]{16,200})["\']', line):
-            candidates.append(match.group(1))
-        for match in re.finditer(r'=\s*([A-Za-z0-9+/=_\-]{16,200})(?:\s|$|;|,)', line):
-            candidates.append(match.group(1))
-        return list(set(candidates))

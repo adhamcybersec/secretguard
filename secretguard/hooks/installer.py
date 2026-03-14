@@ -60,7 +60,12 @@ fi
 
 
 class PreCommitInstaller:
-    """Install and manage pre-commit hooks"""
+    """Install and manage pre-commit hooks.
+
+    .. deprecated::
+        Consider using the `pre-commit` framework instead.
+        See .pre-commit-hooks.yaml for integration details.
+    """
     
     @staticmethod
     def install(repo_path: Path = Path.cwd()) -> bool:

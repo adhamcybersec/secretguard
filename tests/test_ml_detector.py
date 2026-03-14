@@ -8,7 +8,8 @@ def test_ml_detector_finds_secrets():
     line = 'token = "dG9rZW4xMjM0NTY3ODkwYWJjZGVmZ2hpamtsbW5vcHFy"'
     findings = detector.detect(line, 1, Path("config.py"))
     # ML should flag the high-entropy base64 string
-    assert len(findings) >= 0  # May vary; ML is probabilistic
+    assert len(findings) >= 1
+    assert all(isinstance(f.confidence, float) for f in findings)
 
 
 def test_ml_detector_ignores_normal_code():

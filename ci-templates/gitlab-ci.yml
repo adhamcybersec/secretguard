@@ -1,0 +1,20 @@
+# SecretGuard GitLab CI Template
+# Include this in your .gitlab-ci.yml:
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/adhamcybersec/secretguard/master/ci-templates/gitlab-ci.yml'
+
+secretguard-scan:
+  stage: test
+  image: python:3.12-slim
+  before_script:
+    - pip install secretguard
+  script:
+    - secretguard scan . --format sarif --output gl-secretguard-report.sarif
+  artifacts:
+    reports:
+      sast: gl-secretguard-report.sarif
+    when: always
+  allow_failure: false
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'

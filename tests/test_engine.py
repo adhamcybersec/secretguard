@@ -87,3 +87,65 @@ def test_verbose_mode():
     results = engine.scan(tmp)
     tmp.unlink()
     assert results.files_scanned == 1
+
+
+def test_empty_file_scan():
+    """Scanning an empty file should not crash"""
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+        f.write('')
+        tmp = Path(f.name)
+    engine = ScanEngine()
+    results = engine.scan(tmp)
+    tmp.unlink()
+    assert results.files_scanned == 1
+    assert results.total_secrets == 0
+
+
+def test_unicode_content():
+    """Files with unicode content should be handled gracefully"""
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+        f.write('# Comment with unicode: \u00e9\u00e8\u00ea\u00eb \u00fc\u00f6\u00e4\n')
+        f.write('password = "normal_password_here_1234"\n')
+        tmp = Path(f.name)
+    engine = ScanEngine(confidence_threshold=0.0)
+    results = engine.scan(tmp)
+    tmp.unlink()
+    assert results.files_scanned == 1
+
+
+def test_large_line():
+    """Lines larger than typical should not crash the scanner"""
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+        f.write('x = "' + 'A' * 10000 + '"\n')
+        tmp = Path(f.name)
+    engine = ScanEngine()
+    results = engine.scan(tmp)
+    tmp.unlink()
+    assert results.files_scanned == 1
+
+
+def test_binary_detection_accuracy():
+    """Binary files with null bytes should be skipped"""
+    with tempfile.NamedTemporaryFile(suffix='.dat', delete=False) as f:
+        f.write(b'AKIAIOSFODNN7REALKEY\x00\x00binary')
+        tmp = Path(f.name)
+    engine = ScanEngine()
+    results = engine.scan(tmp)
+    tmp.unlink()
+    assert results.files_scanned == 0
+
+
+def test_symlink_skipped():
+    """Symlinks should be skipped to prevent directory traversal"""
+    import os
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir)
+        real_file = root / "real.py"
+        real_file.write_text('key = "AKIAIOSFODNN7REALKEY"\n')
+        link = root / "link.py"
+        os.symlink(real_file, link)
+
+        engine = ScanEngine(confidence_threshold=0.0)
+        results = engine.scan(root)
+        # Only the real file should be scanned, not the symlink
+        assert results.files_scanned == 1

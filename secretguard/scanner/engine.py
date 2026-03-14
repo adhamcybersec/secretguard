@@ -78,6 +78,12 @@ class ScanEngine:
             if not file_path.is_file():
                 continue
 
+            # Skip symlinks to prevent directory escape
+            if file_path.is_symlink():
+                continue
+            if not file_path.resolve().is_relative_to(directory.resolve()):
+                continue
+
             # Check pathspec (gitignore)
             try:
                 rel = file_path.relative_to(directory)
@@ -104,39 +110,47 @@ class ScanEngine:
             if self.verbose:
                 print(f"Scanning: {file_path}")
             
-            content = file_path.read_text(encoding="utf-8", errors="ignore")
-            lines = content.splitlines()
-            
-            for line_num, line in enumerate(lines, start=1):
-                # Check inline ignore
-                if AllowlistManager.check_inline_ignore(line):
-                    continue
+            # Task 8: Stream file line-by-line instead of loading entire file
+            seen: set[tuple[int, str]] = set()
 
-                # Run regex detection
-                regex_findings = self.regex_detector.detect(line, line_num, file_path)
-                for finding in regex_findings:
-                    if finding.confidence >= self.confidence_threshold:
-                        results.findings.append(finding)
-                
-                # Run entropy detection on tokens
-                entropy_findings = self.entropy_detector.detect(line, line_num, file_path)
-                for finding in entropy_findings:
-                    if finding.confidence >= self.confidence_threshold:
-                        results.findings.append(finding)
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
+                for line_num, line in enumerate(f, 1):
+                    line = line.rstrip("\n\r")
 
-                # Run ML detection
-                if self.ml_detector:
-                    ml_findings = self.ml_detector.detect(line, line_num, file_path)
-                    for finding in ml_findings:
+                    # Check inline ignore
+                    if AllowlistManager.check_inline_ignore(line):
+                        continue
+
+                    # Run regex detection
+                    regex_findings = self.regex_detector.detect(line, line_num, file_path)
+                    for finding in regex_findings:
                         if finding.confidence >= self.confidence_threshold:
-                            # Avoid duplicates with regex/entropy findings
-                            if not any(
-                                f.line_number == finding.line_number and f.matched_text == finding.matched_text
-                                for f in results.findings
-                            ):
+                            key = (finding.line_number, finding.matched_text)
+                            if key not in seen:
+                                seen.add(key)
                                 results.findings.append(finding)
+
+                    # Run entropy detection on tokens
+                    entropy_findings = self.entropy_detector.detect(line, line_num, file_path)
+                    for finding in entropy_findings:
+                        if finding.confidence >= self.confidence_threshold:
+                            key = (finding.line_number, finding.matched_text)
+                            if key not in seen:
+                                seen.add(key)
+                                results.findings.append(finding)
+
+                    # Run ML detection
+                    if self.ml_detector:
+                        ml_findings = self.ml_detector.detect(line, line_num, file_path)
+                        for finding in ml_findings:
+                            if finding.confidence >= self.confidence_threshold:
+                                key = (finding.line_number, finding.matched_text)
+                                if key not in seen:
+                                    seen.add(key)
+                                    results.findings.append(finding)
         
         except Exception as e:
+            results.scan_errors.append(f"{file_path}: {e}")
             if self.verbose:
                 print(f"Error scanning {file_path}: {e}")
     

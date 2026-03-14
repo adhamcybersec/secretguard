@@ -61,18 +61,10 @@ class AllowlistManager:
     @staticmethod
     def check_inline_ignore(line_content: str) -> bool:
         """
-        Check if line has inline ignore comment
-        
-        Supports:
-        - # secretguard:ignore
-        - // secretguard:ignore
-        - /* secretguard:ignore */
+        Check if line has inline ignore comment.
+
+        The marker must appear after a comment delimiter (#, //, /* , --)
+        so that ``password = "secretguard:ignore"`` does NOT suppress scanning.
         """
-        ignore_markers = [
-            'secretguard:ignore',
-            'secretguard-ignore',
-            'sg:ignore',
-        ]
-        
-        line_lower = line_content.lower()
-        return any(marker in line_lower for marker in ignore_markers)
+        pattern = r'(?:#|//|/\*|--)\s*(?:secretguard[:\-]ignore|sg:ignore)'
+        return bool(re.search(pattern, line_content, re.IGNORECASE))

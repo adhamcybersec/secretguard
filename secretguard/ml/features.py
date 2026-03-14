@@ -1,6 +1,6 @@
 """Feature extraction for ML-based secret detection"""
 
-import math
+from secretguard.utils.crypto import shannon_entropy
 
 
 SECRET_PREFIXES = [
@@ -19,7 +19,7 @@ def extract_features(candidate: str) -> dict:
     special_count = sum(not c.isalnum() for c in candidate)
 
     return {
-        "entropy": _shannon_entropy(candidate),
+        "entropy": shannon_entropy(candidate),
         "length": length,
         "digit_ratio": digit_count / length if length else 0,
         "upper_ratio": upper_count / length if length else 0,
@@ -30,16 +30,6 @@ def extract_features(candidate: str) -> dict:
         "consecutive_digits_max": _max_consecutive(candidate, str.isdigit),
         "consecutive_upper_max": _max_consecutive(candidate, str.isupper),
     }
-
-
-def _shannon_entropy(s: str) -> float:
-    if not s:
-        return 0.0
-    freq = {}
-    for c in s:
-        freq[c] = freq.get(c, 0) + 1
-    length = len(s)
-    return -sum((count / length) * math.log2(count / length) for count in freq.values())
 
 
 def _max_consecutive(s: str, predicate) -> int:

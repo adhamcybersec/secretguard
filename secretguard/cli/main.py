@@ -28,7 +28,7 @@ console = Console()
 
 @app.command()
 def scan(
-    path: Path = typer.Argument(..., help="Path to scan for secrets"),
+    path: Path = typer.Argument(".", help="Path to scan for secrets"),
     format: str = typer.Option("console", help="Output format: console, json, markdown, html, sarif"),
     output: Optional[Path] = typer.Option(None, help="Output file path"),
     exclude: Optional[List[str]] = typer.Option(None, help="Patterns to exclude"),
@@ -39,6 +39,7 @@ def scan(
     no_config: bool = typer.Option(False, help="Ignore config file"),
     staged: bool = typer.Option(False, "--staged", help="Only scan git-staged files"),
     no_ml: bool = typer.Option(False, "--no-ml", help="Disable ML-based detection (faster scans)"),
+    verify: bool = typer.Option(False, "--verify", help="Attempt live verification of detected credentials"),
 ) -> None:
     """
     Scan a directory for exposed secrets and credentials
@@ -99,6 +100,24 @@ def scan(
         
         results.total_secrets = len(results.findings)
     
+    # Live credential verification
+    if verify and results.findings:
+        from secretguard.verifiers.github_verifier import GitHubVerifier
+        from secretguard.verifiers.aws_verifier import AWSVerifier
+
+        verifiers = [GitHubVerifier(), AWSVerifier()]
+        console.print("[cyan]Verifying credentials...[/cyan]")
+        for finding in results.findings:
+            for v in verifiers:
+                if v.can_verify(finding.secret_type, finding.matched_text):
+                    vr = v.verify(finding.matched_text)
+                    finding.is_verified = vr.is_valid
+                    status = "[red]ACTIVE[/red]" if vr.is_valid else "[green]inactive/invalid[/green]"
+                    if vr.error:
+                        status = f"[yellow]error: {vr.error}[/yellow]"
+                    console.print(f"  {v.service_name}: {status} — {vr.detail}")
+                    break
+
     # Display results
     if format == "console":
         display_console_results(results, remediate)
@@ -141,6 +160,13 @@ def scan(
         console.print(f"[red]Error: Unknown format '{format}'[/red]")
         raise typer.Exit(code=1)
     
+    # Display scan errors if any
+    if results.scan_errors:
+        console.print(f"\n[yellow]Warning: {len(results.scan_errors)} file(s) had scan errors[/yellow]")
+        if verbose:
+            for err in results.scan_errors:
+                console.print(f"  [dim]{err}[/dim]")
+
     # Exit with error code if secrets found
     if results.total_secrets > 0:
         console.print(f"\n[yellow]⚠️  Found {results.total_secrets} potential secrets![/yellow]")
@@ -175,6 +201,89 @@ def display_console_results(results, include_remediation: bool = False) -> None:
             console.print(f"\n{idx}. {finding.file_path}:{finding.line_number}")
             console.print(f"   [yellow]Issue:[/yellow] {finding.secret_type}")
             console.print(f"   [green]Fix:[/green] {finding.remediation_suggestion}")
+
+
+@app.command("scan-history")
+def scan_history(
+    path: Path = typer.Argument(".", help="Path to git repository"),
+    max_commits: int = typer.Option(100, "--max-commits", help="Maximum commits to scan"),
+    branch: Optional[str] = typer.Option(None, "--branch", help="Branch to scan"),
+    format: str = typer.Option("console", help="Output format: console, json, sarif"),
+    output: Optional[Path] = typer.Option(None, help="Output file path"),
+    confidence: float = typer.Option(0.75, help="Minimum confidence threshold"),
+) -> None:
+    """Scan git history for secrets in past commits"""
+    from secretguard.scanner.git_history import GitHistoryScanner
+
+    console.print(f"[cyan]Scanning git history (up to {max_commits} commits)...[/cyan]")
+
+    scanner = GitHistoryScanner(confidence_threshold=confidence)
+    results = scanner.scan_history(path, max_commits=max_commits, branch=branch)
+
+    if results.scan_errors:
+        for err in results.scan_errors:
+            console.print(f"[red]Error: {err}[/red]")
+
+    if format == "console":
+        table = Table(title="Git History Findings", show_header=True, header_style="bold magenta")
+        table.add_column("Commit", style="cyan", max_width=10)
+        table.add_column("Author", style="yellow")
+        table.add_column("File", style="cyan")
+        table.add_column("Type", style="red")
+        table.add_column("Severity", style="bold red")
+
+        for f in results.findings:
+            table.add_row(
+                f.commit_hash[:8],
+                f.commit_author,
+                str(f.file_path),
+                f.secret_type,
+                f.severity.value.upper(),
+            )
+        console.print(table)
+    elif format == "json":
+        reporter = JSONReporter()
+        report_data = reporter.generate(results)
+        if output:
+            reporter.save(report_data, output)
+        else:
+            print(report_data)
+    elif format == "sarif":
+        reporter = SARIFReporter()
+        report_data = reporter.generate(results)
+        if output:
+            reporter.save(report_data, output)
+        else:
+            print(report_data)
+
+    if results.total_secrets > 0:
+        console.print(f"\n[yellow]Found {results.total_secrets} secrets in git history![/yellow]")
+        raise typer.Exit(code=1)
+    else:
+        console.print("\n[green]No secrets found in git history.[/green]")
+
+
+@app.command("ml-evaluate")
+def ml_evaluate() -> None:
+    """Evaluate the ML classifier with cross-validation metrics"""
+    from secretguard.ml.classifier import SecretClassifier
+    from secretguard.ml.training_data import TRAINING_DATA
+    from rich.table import Table
+
+    console.print("[cyan]Evaluating ML classifier (5-fold stratified CV)...[/cyan]")
+    console.print(f"[dim]Training samples: {len(TRAINING_DATA)}[/dim]")
+
+    clf = SecretClassifier()
+    metrics = clf.evaluate()
+
+    table = Table(title="ML Classifier Evaluation")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Score", justify="right", style="green")
+
+    for name, value in metrics.items():
+        table.add_row(name.capitalize(), f"{value:.4f}")
+
+    console.print(table)
 
 
 @app.command()

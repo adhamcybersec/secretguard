@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from secretguard.detectors.entropy_detector import EntropyDetector
+from secretguard.utils.crypto import shannon_entropy, extract_candidates
 
 
 @pytest.fixture
@@ -17,10 +18,10 @@ def detector():
 def test_entropy_calculation(detector):
     """Test Shannon entropy calculation"""
     # Low entropy (repeated characters)
-    assert detector._calculate_entropy("aaaaaaaaaa") < 1.0
-    
+    assert shannon_entropy("aaaaaaaaaa") < 1.0
+
     # High entropy (random-looking)
-    assert detector._calculate_entropy("aB3$xY9!mN2@pQ7&") > 3.0
+    assert shannon_entropy("aB3$xY9!mN2@pQ7&") > 3.0
 
 
 def test_high_entropy_detection(detector):
@@ -29,7 +30,8 @@ def test_high_entropy_detection(detector):
     findings = detector.detect(line, 15, Path("config.py"))
     
     # Should detect the base64-like string
-    assert len(findings) >= 0  # May or may not detect depending on thresholds
+    assert len(findings) >= 1
+    assert all(isinstance(f.confidence, float) for f in findings)
 
 
 def test_uuid_exclusion(detector):
@@ -47,7 +49,7 @@ def test_git_hash_exclusion(detector):
 def test_candidate_extraction(detector):
     """Test extraction of candidate strings"""
     line = 'api_key = "some_long_random_key_12345678901234567890"'
-    candidates = detector._extract_candidates(line)
+    candidates = extract_candidates(line)
     
     assert len(candidates) > 0
     assert any("some_long_random_key" in c for c in candidates)
