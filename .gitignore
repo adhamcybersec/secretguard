@@ -79,3 +79,12 @@ Next.md
 
 # Claude
 .claude-initial-prompt.md
+*.pyc
+node_modules/
+.venv/
+.next/
+.cache/
+.env.*
+*.key
+*.pem
+*.p12

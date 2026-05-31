@@ -1,0 +1,18 @@
+wing: secretguard
+rooms:
+- name: htmlcov
+  description: Files from htmlcov/
+- name: ci_templates
+  description: Files from ci-templates/
+- name: demo_scan
+  description: Files from demo-scan/
+- name: secretguard
+  description: Files from secretguard/
+- name: testing
+  description: Files from tests/
+- name: configuration
+  description: Files from config/
+- name: scripts
+  description: Files from utils/
+- name: general
+  description: Files that don't fit other rooms
